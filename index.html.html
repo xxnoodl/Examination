@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>La Villa - Navigation</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  
+  <style>
+    /* UI Overlay Styling */
+    #nav-gui {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-button {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: 1px solid white;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-family: sans-serif;
+      border-radius: 5px;
+      transition: background 0.2s;
+      text-align: left;
+    }
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+
+  <script>
+    // Navigation Logic
+    window.teleportCam = function(pos, rot) {
+      const camRig = document.querySelector('#cameraRig');
+      
+      // Update position
+      camRig.setAttribute('position', pos);
+      
+      // Update rotation
+      // Note: A-Frame rotations on a rig can be tricky with look-controls.
+      // We set the rotation of the rig itself.
+      camRig.setAttribute('rotation', rot);
+    };
+
+    // Existing Water Component
+    AFRAME.registerComponent('water-waves', {
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          mesh.traverse((node) => {
+            if (!node.isMesh) return;
+            const mat = node.material;
+            mat.metalness = 0;
+            mat.roughness = 0.05;
+            mat.transparent = true;
+            mat.opacity = 0.85;
+            const loader = new THREE.TextureLoader();
+            this.normal1 = loader.load('Water_001_NORM.jpg');
+            this.normal2 = loader.load('Water_002_NORM.jpg');
+            [this.normal1, this.normal2].forEach(tex => {
+              tex.wrapS = THREE.RepeatWrapping;
+              tex.wrapT = THREE.RepeatWrapping;
+            });
+            mat.normalMap = this.normal1;
+            mat.normalScale.set(0.4, 0.4);
+            this.mat = mat;
+          });
+        });
+      },
+      tick: function (time, delta) {
+        if (!this.normal1 || !this.normal2) return;
+        const speed = delta * 0.0002;
+        this.normal1.offset.x += speed;
+        this.normal1.offset.y += speed * 0.5;
+        this.normal2.offset.x -= speed * 0.7;
+        this.normal2.offset.y += speed * 0.3;
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <div id="nav-gui">
+    <button class="nav-button" onclick="teleportCam('-16 5.67 -1.83', '0 0 0')">🛏️ Bedroom</button>
+    <button class="nav-button" onclick="teleportCam('0.08 2.10 11.90', '0.6 49.4 0')">🚗 Car Park</button>
+    <button class="nav-button" onclick="teleportCam('-15 1 -12.03', '0 -44 0')">☕ Coffee Tent</button>
+    <button class="nav-button" onclick="teleportCam('8 0 -4', '5 90 0')">🏠 House Entrance</button>
+    <button class="nav-button" onclick="teleportCam('-11 5.57 1.38', '0 -44 0')">🍳 Kitchen</button>
+    <button class="nav-button" onclick="teleportCam('-10 1.67 -1.83', '0 90 0')">📺 Living Room</button>
+    <button class="nav-button" onclick="teleportCam('-6 1 -9.03', '0 -44 0')">🏊 Pool</button>
+  </div>
+
+  <a-scene background="color: #cfe9ff">
+    <a-sky src="sky.jpg" rotation="0 -90 0"></a-sky>
+
+    <a-entity id="cameraRig" position="8 0 -4" rotation="5 90 0">
+      <a-camera look-controls wasd-controls></a-camera>
+    </a-entity>
+
+    <a-light type="ambient" intensity="0.7"></a-light>
+    <a-light type="directional" position="5 10 7" intensity="1"></a-light>
+
+    <a-entity gltf-model="url(pool_tiles.gltf)"></a-entity>
+    <a-entity gltf-model="url(pool_bench.gltf)"></a-entity>
+    <a-entity gltf-model="url(pool_water.gltf)" water-waves></a-entity>
+    <a-entity gltf-model="url(pool_wood.gltf)"></a-entity>
+    <a-entity gltf-model="url(pool_plant.gltf)"></a-entity>
+    <a-entity gltf-model="url(car_covered.gltf)"></a-entity>
+    <a-entity gltf-model="url(car_rims.gltf)"></a-entity>
+    <a-entity gltf-model="url(car_tires.gltf)"></a-entity>
+    <a-entity gltf-model="url(car_truck.gltf)"></a-entity>
+    <a-entity gltf-model="url(car_sport.gltf)"></a-entity>
+    <a-entity gltf-model="url(building1.gltf)"></a-entity>
+    <a-entity gltf-model="url(building2.gltf)"></a-entity>
+    <a-entity gltf-model="url(rocks.gltf)"></a-entity>
+    <a-entity gltf-model="url(tiles.gltf)"></a-entity>
+    <a-entity gltf-model="url(all_plants.gltf)"></a-entity>
+    <a-entity gltf-model="url(coffee_tent.gltf)"></a-entity>
+    <a-entity gltf-model="url(living_room.gltf)"></a-entity>
+    <a-entity gltf-model="url(kitchen.gltf)"></a-entity>
+    <a-entity gltf-model="url(bedroom.gltf)"></a-entity>
+    <a-entity gltf-model="url(outside_shi.gltf)"></a-entity>
+
+  </a-scene>
+</body>
+</html>
